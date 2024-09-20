@@ -1,0 +1,43 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+/httpRequests/
+/dataSources/
+/dataSources.local.xml
+
+# Ignorar todo dentro de target y project/target, sin necesidad de duplicar
+/target/
+/project/target/
+/project/project/
+
+# Ignorar cualquier versión de Scala
+/target/scala-*/ 
+/project/target/scala-*/
+
+# Ignorar archivos comunes
+*.tmp
+*.swp
+*.bak
+*.log
+.DS_Store
+.idea/
+/.vscode/
+/*.iml
+
+# Ignorar bibliotecas y compilados
+lib_managed/
+src_managed/
+dist/
+
+*.war
+*.class
+*.so
+*.dll
+*.exe
+*.bin
+*.o
+
+# Ignorar carpetas de pruebas y cobertura
+/test-reports/
+/coverage/
+/*.out
