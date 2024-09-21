@@ -1,0 +1,3 @@
+package events
+
+trait Event

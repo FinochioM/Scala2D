@@ -1,0 +1,3 @@
+package ecs
+
+trait Component

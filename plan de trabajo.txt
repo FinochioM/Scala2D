@@ -1,0 +1,73 @@
+Plan de Acción Propuesto:
+Fase 1: Definición y Arquitectura del Framework
+
+1.1. Diseño del ECS Personalizado:
+
+Investigación: Analizar sistemas ECS existentes en otros lenguajes y en Scala para tomar ideas.
+Diseño: Definir cómo se adaptará el ECS a las características de Scala, aprovechando la programación funcional y la concurrencia.
+Consideraciones: Establecer una arquitectura modular que facilite futuras expansiones, como el Render Graph y sistemas de animación.
+1.2. Gestión de Recursos y Renderizado:
+
+Análisis Técnico:
+Evaluar las mejores prácticas para cargar y gestionar texturas en tiempo real.
+Investigar sobre formatos de texturas optimizados y técnicas de compresión.
+Estudiar cómo implementar un sistema de caché eficiente.
+Decisiones Clave:
+Determinar si la conversión a formato binario es la estrategia más adecuada.
+Establecer un pipeline de carga de recursos que permita extensiones futuras (como sonido y otros tipos de assets).
+1.3. Hot Reloading:
+
+Implementación Inicial:
+Diseñar el sistema de hot reloading para assets críticos como texturas y scripts.
+Asegurar que la arquitectura del framework soporte la recarga dinámica sin afectar la estabilidad.
+1.4. Optimización de Tiempos de Compilación:
+
+Estrategias:
+Configurar el proyecto para aprovechar incremental compilation en Scala.
+Utilizar herramientas como Zinc y sbt para acelerar los tiempos de compilación.
+Modularizar el código para compilar solo las partes que cambian.
+Fase 2: Desarrollo del Núcleo del Framework
+
+2.1. Implementación del ECS:
+
+Desarrollo:
+Codificar los componentes básicos del ECS (entidades, componentes, sistemas).
+Crear ejemplos simples para probar su funcionamiento.
+Testing:
+Escribir pruebas unitarias para garantizar la estabilidad y flexibilidad del ECS.
+2.2. Sistema de Renderizado 2D:
+
+Desarrollo:
+Implementar el pipeline de renderizado básico utilizando APIs gráficas de bajo nivel (como OpenGL o Vulkan a través de bindings en Scala).
+Integrar el sistema de gestión de recursos con el renderizador.
+Optimización:
+Aplicar técnicas de batch rendering y gestión eficiente de memoria gráfica.
+2.3. Implementación del Hot Reloading:
+
+Desarrollo:
+Integrar el sistema de hot reloading con la gestión de recursos y el ECS.
+Asegurar que los cambios en assets se reflejen en tiempo real en la aplicación.
+Fase 3: Preparación para Funcionalidades Futuras
+
+3.1. Arquitectura Flexible:
+
+Diseño:
+Estructurar el código y los módulos para facilitar la inclusión futura de sistemas como Render Graph, animaciones, UI y sonido.
+Documentar las interfaces y puntos de extensión.
+3.2. DSL Interno (Opcional):
+
+Exploración:
+Evaluar si un DSL interno podría simplificar el uso del framework.
+Prototipar algunas funciones utilizando DSL y medir su efectividad.
+Fase 4: Creación del Template y Documentación
+
+4.1. Template de Proyecto:
+
+Desarrollo:
+Crear un template que los desarrolladores puedan descargar y utilizar en IntelliJ IDEA.
+Incluir configuraciones básicas y ejemplos para empezar a trabajar con el framework.
+4.2. Documentación:
+
+Contenido:
+Escribir documentación clara sobre cómo utilizar el framework, sus componentes principales y ejemplos de uso.
+Incluir guías sobre cómo aprovechar el hot reloading y otros features implementados.
