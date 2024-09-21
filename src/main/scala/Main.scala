@@ -11,7 +11,8 @@ object Main {
     val world = new World
 
     world.addSystem(new MovementSystem(world))
-    world.addSystem(new RenderSystem(world))
+    val renderSystem = new RenderSystem(world)
+    world.addSystem(renderSystem)
 
     val entity = world.entityManager.createEntity()
     world.componentManager.addComponent(entity, PositionComponent(0f, 0f))
@@ -30,6 +31,7 @@ object Main {
       window.update()
     }
     
+    renderSystem.cleanup()
     window.cleanup()
   }
 }
