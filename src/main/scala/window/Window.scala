@@ -2,7 +2,6 @@ package window
 
 import org.lwjgl.glfw.GLFW._
 import org.lwjgl.opengl.GL
-import org.lwjgl.opengl.GL11._
 import org.lwjgl.system.MemoryUtil.NULL
 
 class Window(val width: Int, val height: Int, val title: String) {
@@ -12,7 +11,7 @@ class Window(val width: Int, val height: Int, val title: String) {
     if (!glfwInit()) {
       throw new IllegalStateException("No se pudo inicializar GLFW")
     }
-    
+
     glfwDefaultWindowHints()
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
@@ -24,22 +23,20 @@ class Window(val width: Int, val height: Int, val title: String) {
     if (windowHandle == NULL) {
       throw new RuntimeException("No se pudo crear la ventana")
     }
-    
+
     val videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
     glfwSetWindowPos(
       windowHandle,
       (videoMode.width() - width) / 2,
       (videoMode.height() - height) / 2
     )
-    
+
     glfwMakeContextCurrent(windowHandle)
     glfwSwapInterval(1)
-    
+
     glfwShowWindow(windowHandle)
-    
+
     GL.createCapabilities()
-    
-    val version = glGetString(GL_VERSION)
   }
 
   def shouldClose(): Boolean = glfwWindowShouldClose(windowHandle)

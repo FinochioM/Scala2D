@@ -1,7 +1,10 @@
 import ecs.World
 import systems.{MovementSystem, RenderSystem}
 import components.{PositionComponent, RenderComponent, VelocityComponent}
+import graphics.Texture
+import org.lwjgl.opengl.GL11.glViewport
 import window.Window
+
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -11,13 +14,15 @@ object Main {
     val world = new World
 
     world.addSystem(new MovementSystem(world))
-    val renderSystem = new RenderSystem(world)
+    val renderSystem = new RenderSystem(world, window.width, window.height)
     world.addSystem(renderSystem)
 
     val entity = world.entityManager.createEntity()
     world.componentManager.addComponent(entity, PositionComponent(0f, 0f))
-    world.componentManager.addComponent(entity, VelocityComponent(0.1f, 0.1f))
-    world.componentManager.addComponent(entity, RenderComponent())
+    world.componentManager.addComponent(entity, VelocityComponent(15f, 15f))
+
+    val texture = new Texture("textures/test_image.png")
+    world.componentManager.addComponent(entity, RenderComponent(texture, texture.width.toFloat, texture.height.toFloat))
     
 
     var lastTime = System.nanoTime()

@@ -8,16 +8,16 @@ lazy val root = (project in file("."))
   )
 
 libraryDependencies ++= Seq(
-  "org.lwjgl" % "lwjgl" % "3.3.2",
-  "org.lwjgl" % "lwjgl-opengl" % "3.3.2",
-  "org.lwjgl" % "lwjgl-glfw" % "3.3.2",
-  "org.lwjgl" % "lwjgl-stb" % "3.3.2",
-  "org.joml" % "joml" % "1.10.5"
+  "org.lwjgl" % "lwjgl" % "3.3.4",
+  "org.lwjgl" % "lwjgl-opengl" % "3.3.4",
+  "org.lwjgl" % "lwjgl-glfw" % "3.3.4",
+  "org.lwjgl" % "lwjgl-stb" % "3.3.4",
+  "org.joml" % "joml" % "1.10.7"
 )
 
 libraryDependencies ++= Seq(
-  "org.lwjgl" % "lwjgl" % "3.3.2" classifier "natives-windows",
-  "org.lwjgl" % "lwjgl-opengl" % "3.3.2" classifier "natives-windows",
-  "org.lwjgl" % "lwjgl-glfw" % "3.3.2" classifier "natives-windows",
-  "org.lwjgl" % "lwjgl-stb" % "3.3.2" classifier "natives-windows"
+  "org.lwjgl" % "lwjgl" % "3.3.4" classifier "natives-windows",
+  "org.lwjgl" % "lwjgl-opengl" % "3.3.4" classifier "natives-windows",
+  "org.lwjgl" % "lwjgl-glfw" % "3.3.4" classifier "natives-windows",
+  "org.lwjgl" % "lwjgl-stb" % "3.3.4" classifier "natives-windows"
 )
