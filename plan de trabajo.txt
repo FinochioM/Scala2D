@@ -71,3 +71,50 @@ Incluir configuraciones básicas y ejemplos para empezar a trabajar con el frame
 Contenido:
 Escribir documentación clara sobre cómo utilizar el framework, sus componentes principales y ejemplos de uso.
 Incluir guías sobre cómo aprovechar el hot reloading y otros features implementados.
+
+
+
+
+
+
+
+
+
+
+Siguientes Pasos para el Desarrollo del Framework
+
+2. Mejoras en el Sistema de Renderizado
+Batch Rendering:
+
+Implementar técnicas de batch rendering para reducir las llamadas a la GPU y mejorar el rendimiento.
+Gestión Eficiente de Memoria Gráfica:
+
+Optimizar el uso de VBOs y shaders para manejar múltiples entidades de manera eficiente.
+3. Arquitectura Flexible para Futuras Funcionalidades
+Diseño Modular:
+
+Reestructurar el código si es necesario para facilitar la inclusión de nuevos sistemas como animaciones, UI y sonido.
+Documentación y Puntos de Extensión:
+
+Documentar claramente cómo extender el framework y cómo funcionan sus componentes internos.
+4. Creación del Template y Documentación
+Template de Proyecto:
+
+Crear un repositorio o archivo que los usuarios puedan clonar o descargar, conteniendo una estructura de proyecto preconfigurada y lista para usar.
+Documentación Detallada:
+
+Escribir documentación que incluya:
+
+Guía de Inicio Rápido: Cómo configurar el entorno y ejecutar un ejemplo básico.
+Referencia de API: Explicación de las clases, métodos y cómo interactuar con ellos.
+Tutoriales y Ejemplos: Casos de uso comunes y cómo implementarlos.
+5. Implementación de Nuevas Funcionalidades
+Sistema de Animaciones:
+
+Añadir soporte para animaciones de sprites, utilizando spritesheets y cambiando las coordenadas de textura.
+Soporte de Sonido y Música:
+
+Implementar un sistema de audio básico para reproducir efectos de sonido y música de fondo.
+Optimización y Mejora del ECS:
+
+Mejorar el rendimiento del ECS, quizás utilizando mejores estructuras de datos o paralelización donde sea posible.

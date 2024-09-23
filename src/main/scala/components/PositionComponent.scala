@@ -2,4 +2,4 @@ package components
 
 import ecs.Component
 
-case class PositionComponent(x: Float, y: Float) extends Component
+case class PositionComponent(var x: Float, var y: Float) extends Component

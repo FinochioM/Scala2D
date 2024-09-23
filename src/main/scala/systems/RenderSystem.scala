@@ -1,136 +1,147 @@
 package systems
 
 import ecs.{System, World}
-import components.{PositionComponent, RenderComponent}
-import graphics.ShaderProgram
+import components.{AtlasSprite, PositionComponent, RenderComponent, SingleTexture, ZOrder}
+import graphics.{BatchRenderer, ShaderProgram, Texture, TextureAtlas}
+import camera.Camera2D
 import org.joml.Matrix4f
 import org.lwjgl.BufferUtils
-import org.lwjgl.opengl.GL11._
-import org.lwjgl.opengl.GL13._
-import org.lwjgl.opengl.GL15._
-import org.lwjgl.opengl.GL20._
-import org.lwjgl.opengl.GL30._
+import org.lwjgl.opengl.GL11.*
+import org.lwjgl.opengl.GL13.*
+import org.lwjgl.opengl.GL20.{glGetUniformLocation, glUniform1i, glUniformMatrix4fv}
+import spatial.{BoundingBox, QuadTree}
 
 class RenderSystem(world: World, windowWidth: Int, windowHeight: Int) extends System {
   private val shaderProgram = new ShaderProgram("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl")
-  private var vaoId: Int = 0
-  private var vboId: Int = 0
-  private var eboId: Int = 0
-  private var modelMatrixLocation: Int = 0
-  private var projectionMatrixLocation: Int = 0
+  private val projectionMatrix = new Matrix4f().ortho2D(0f, windowWidth.toFloat, windowHeight.toFloat, 0f)
+  private val batchRenderer = new BatchRenderer()
+
+  private var camera = Camera2D(0f, 0f, windowWidth.toFloat, windowHeight.toFloat)
+  private val quadTree = new QuadTree(BoundingBox(camera.x, camera.y, camera.width, camera.height))
 
   init()
 
   private def init(): Unit = {
     shaderProgram.use()
-    modelMatrixLocation = glGetUniformLocation(shaderProgram.programId, "model")
-    if (modelMatrixLocation < 0) {
-      throw new RuntimeException("No se pudo encontrar el uniforme 'model' en el shader.")
-    }
 
-    projectionMatrixLocation = glGetUniformLocation(shaderProgram.programId, "projection")
-    if (projectionMatrixLocation < 0) {
-      throw new RuntimeException("No se pudo encontrar el uniforme 'projection' en el shader.")
-    }
-
-    val textureUniformLocation = glGetUniformLocation(shaderProgram.programId, "texture1")
-    if (textureUniformLocation < 0) {
-      throw new RuntimeException("No se pudo encontrar el uniforme 'texture1' en el shader.")
-    }
-    glUniform1i(textureUniformLocation, 0)
-
-    // Crear la matriz de proyección
-    val projectionMatrix = new Matrix4f().ortho2D(0f, windowWidth.toFloat, windowHeight.toFloat, 0f)
+    val projectionMatrixLocation = glGetUniformLocation(shaderProgram.programId, "projection")
     val projectionBuffer = BufferUtils.createFloatBuffer(16)
     projectionMatrix.get(projectionBuffer)
     glUniformMatrix4fv(projectionMatrixLocation, false, projectionBuffer)
 
-    // Definir los vértices (coordenadas normalizadas)
-    val vertices = Array(
-      // x, y, z, u, v
-      0f, 0f, 0.0f, 0.0f, 0.0f, // Inferior izquierda
-      1f, 0f, 0.0f, 1.0f, 0.0f, // Inferior derecha
-      1f, 1f, 0.0f, 1.0f, 1.0f, // Superior derecha
-      0f, 1f, 0.0f, 0.0f, 1.0f  // Superior izquierda
-    )
+    val atlasTextureLocation = glGetUniformLocation(shaderProgram.programId, "atlasTexture")
+    glUniform1i(atlasTextureLocation, 0)
 
-    val indices = Array(
-      0, 1, 2,
-      2, 3, 0
-    )
+    val individualTextureLocation = glGetUniformLocation(shaderProgram.programId, "individualTexture")
+    glUniform1i(individualTextureLocation, 1)
 
-    vaoId = glGenVertexArrays()
-    glBindVertexArray(vaoId)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-    vboId = glGenBuffers()
-    glBindBuffer(GL_ARRAY_BUFFER, vboId)
-    val vertexBuffer = BufferUtils.createFloatBuffer(vertices.length)
-    vertexBuffer.put(vertices).flip()
-    glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW)
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * 4, 0)
-    glEnableVertexAttribArray(0)
-    glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * 4, (3 * 4).toLong)
-    glEnableVertexAttribArray(1)
-
-    eboId = glGenBuffers()
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboId)
-    val indexBuffer = BufferUtils.createIntBuffer(indices.length)
-    indexBuffer.put(indices).flip()
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW)
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0)
-    glBindVertexArray(0)
+    shaderProgram.use()
   }
 
   override def update(deltaTime: Float): Unit = {
+    val frameStart = System.nanoTime()
+    
     glClear(GL_COLOR_BUFFER_BIT)
     glClearColor(0f, 0f, 0f, 1.0f)
 
     shaderProgram.use()
-
+    
+    quadTree.clear()
+    
     val entities = world.componentManager.getEntitiesWithComponents(
       classOf[PositionComponent],
-      classOf[RenderComponent]
+      classOf[RenderComponent],
+      classOf[ZOrder]
     )
 
     entities.foreach { entity =>
-      val position = world.componentManager.getComponent[PositionComponent](entity).get
-      val render = world.componentManager.getComponent[RenderComponent](entity).get
-
-      // Crear la matriz de modelo con escala y traslación
-      val modelMatrix = new Matrix4f()
-        .translate(position.x, position.y, 0f)
-        .scale(render.width, render.height, 1f)
-
-      val modelBuffer = BufferUtils.createFloatBuffer(16)
-      modelMatrix.get(modelBuffer)
-      glUniformMatrix4fv(modelMatrixLocation, false, modelBuffer)
-
-      glActiveTexture(GL_TEXTURE0)
-      render.texture.bind()
-
-      glBindVertexArray(vaoId)
-      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0)
-      glBindVertexArray(0)
-
-      render.texture.unbind()
+      val positionOpt = world.componentManager.getComponent[PositionComponent](entity)
+      val renderOpt = world.componentManager.getComponent[RenderComponent](entity)
+      (positionOpt, renderOpt) match {
+        case (Some(position), Some(render)) =>
+          quadTree.insert(entity, position, render)
+        case _ =>
+      }
     }
+    
+    val frustum = BoundingBox(camera.x, camera.y, camera.width, camera.height)
+    
+    val visibleEntities = quadTree.query(frustum, List(), world)
+    
+    val sortedEntities = visibleEntities.toList.sortBy { entity =>
+      world.componentManager.getComponent[ZOrder](entity).map(_.order).getOrElse(0)
+    }
+    
+    var currentTextureType: Option[String] = None
+    var currentTextureId: Option[Int] = None
+    var batchStarted = false
 
-    glUseProgram(0)
+    sortedEntities.foreach { entity =>
+      val positionOpt = world.componentManager.getComponent[PositionComponent](entity)
+      val renderOpt = world.componentManager.getComponent[RenderComponent](entity)
+
+      (positionOpt, renderOpt) match {
+        case (Some(position), Some(render)) =>
+          val (textureType, textureId, texCoords, transform) = render.renderable match {
+            case AtlasSprite(sprite, atlas) =>
+              ("atlas", atlas.textureId, sprite.texCoords, new Matrix4f().translate(position.x, position.y, 0f))
+            case SingleTexture(texture, coords) =>
+              ("single", texture.textureId, coords, new Matrix4f().translate(position.x, position.y, 0f))
+          }
+          
+          if (currentTextureType.contains(textureType) && currentTextureId.contains(textureId)) {
+            batchRenderer.drawQuad(0f, 0f, render.width, render.height, texCoords, transform)
+          } else {
+            if (batchStarted) {
+              batchRenderer.endBatch()
+            }
+            
+            batchRenderer.beginBatch()
+            
+            textureType match {
+              case "atlas" =>
+                glActiveTexture(GL_TEXTURE0)
+                glBindTexture(GL_TEXTURE_2D, textureId)
+                glUniform1i(glGetUniformLocation(shaderProgram.programId, "useAtlas"), 1)
+              case "single" =>
+                glActiveTexture(GL_TEXTURE1)
+                glBindTexture(GL_TEXTURE_2D, textureId)
+                glUniform1i(glGetUniformLocation(shaderProgram.programId, "useAtlas"), 0)
+            }
+            
+            currentTextureType = Some(textureType)
+            currentTextureId = Some(textureId)
+            batchStarted = true
+            
+            batchRenderer.drawQuad(0f, 0f, render.width, render.height, texCoords, transform)
+          }
+
+        case _ =>
+      }
+    }
+    
+    if (batchStarted) {
+      batchRenderer.endBatch()
+    }
+    
+    val frameEnd = System.nanoTime()
+    val frameTime = (frameEnd - frameStart) / 1e6f // en ms
   }
 
   def cleanup(): Unit = {
-    glDisableVertexAttribArray(0)
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0)
-    glDeleteBuffers(vboId)
-
-    glBindVertexArray(0)
-    glDeleteVertexArrays(vaoId)
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
-    glDeleteBuffers(eboId)
+    batchRenderer.cleanup()
     shaderProgram.delete()
+  }
+
+  def setCamera(newCamera: Camera2D): Unit = {
+    camera = newCamera
+    quadTree.clear()
+    quadTree.boundary.x = newCamera.x
+    quadTree.boundary.y = newCamera.y
+    quadTree.boundary.width = newCamera.width
+    quadTree.boundary.height = newCamera.height
   }
 }

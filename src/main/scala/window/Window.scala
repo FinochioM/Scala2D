@@ -1,11 +1,14 @@
 package window
 
 import org.lwjgl.glfw.GLFW._
+import org.lwjgl.glfw._
 import org.lwjgl.opengl.GL
 import org.lwjgl.system.MemoryUtil.NULL
+import input.Input
 
 class Window(val width: Int, val height: Int, val title: String) {
   private var windowHandle: Long = 0
+  private var keyCallback: GLFWKeyCallback = _
 
   def init(): Unit = {
     if (!glfwInit()) {
@@ -37,6 +40,13 @@ class Window(val width: Int, val height: Int, val title: String) {
     glfwShowWindow(windowHandle)
 
     GL.createCapabilities()
+
+    keyCallback = new GLFWKeyCallback() {
+      override def invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int): Unit = {
+        input.Input.handleKeyInput(key, action)
+      }
+    }
+    glfwSetKeyCallback(windowHandle, keyCallback)
   }
 
   def shouldClose(): Boolean = glfwWindowShouldClose(windowHandle)
@@ -49,5 +59,6 @@ class Window(val width: Int, val height: Int, val title: String) {
   def cleanup(): Unit = {
     glfwDestroyWindow(windowHandle)
     glfwTerminate()
+    keyCallback.free()
   }
 }
